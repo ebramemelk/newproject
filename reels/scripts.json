@@ -1,0 +1,85 @@
+{
+  "page_name": "@YOUR_PAGE",
+  "voices": { "youssef": "Enceladus", "jesus": "Algieba" },
+  "speakers": { "youssef": "يوسف", "jesus": "يسوع" },
+  "reels": [
+    {
+      "id": "reel4_only_in_trouble",
+      "order": 1,
+      "title": "لما بيبقى عندي مشكلة بس",
+      "setting": "old Cairo rooftop at night turning to sunrise, satellite dishes, water tanks, laundry lines, minarets and church domes",
+      "lines": [
+        { "speaker": "youssef", "text": "يا رب أنا مكسوف منك... مبجيش أكلمك غير لما أكون في مشكلة. لما ببقى كويس بنساك... ولما الدنيا تقفل في وشي أجري عليك." },
+        { "speaker": "jesus", "text": "وأنا فرحان إنك هنا." },
+        { "speaker": "youssef", "text": "يعني أنا مش وحش؟" },
+        { "speaker": "jesus", "text": "لأ... أنا اللي قلتلك تيجي وقت الضيق. «ادعني في يوم الضيق... أنقذك.»" }
+      ],
+      "verse_ref": "مزمور 50: 15"
+    },
+    {
+      "id": "reel1_loneliness",
+      "order": 2,
+      "title": "الوحدة",
+      "setting": "crowded Downtown Cairo street, blurred faceless commuters, old Khedivial buildings",
+      "lines": [
+        { "speaker": "youssef", "text": "يا رب... أنا وسط كل الناس دي ومحدش حاسس بيّا. بكلم ناس طول اليوم... ومحدش فيهم بيسألني إنت عامل إيه بجد." },
+        { "speaker": "jesus", "text": "أنا سامعك... وأنا بسألك: إنت عامل إيه؟" },
+        { "speaker": "youssef", "text": "بجد؟... طب ليه دايمًا حاسس إني لوحدي؟" },
+        { "speaker": "jesus", "text": "عشان مستني الناس تملى مكان أنا بس اللي أقدر أملاه. وأنا قلتلك: «لا أهملك ولا أتركك.»" }
+      ],
+      "verse_ref": "عبرانيين 13: 5"
+    },
+    {
+      "id": "reel2_tired",
+      "order": 3,
+      "title": "التعب",
+      "setting": "busy Cairo microbus stop at dusk, worn sidewalk curb, blurred microbuses and crowds",
+      "lines": [
+        { "speaker": "youssef", "text": "يا رب أنا تعبت... بصحى بدري وبرجع آخر الليل، والفلوس بتخلص قبل الشهر ما يخلص... وحاسس إني مش ملاحق على حاجة." },
+        { "speaker": "jesus", "text": "تعالى اقعد جنبي شوية." },
+        { "speaker": "youssef", "text": "طب وكل اللي ورايا ده... مين هيشيله؟" },
+        { "speaker": "jesus", "text": "مش لازم تشيله لوحدك. «تعالوا إليّ يا جميع المتعبين والثقيلي الأحمال... وأنا أريحكم.»" }
+      ],
+      "verse_ref": "متى 11: 28"
+    },
+    {
+      "id": "reel3_guilt",
+      "order": 4,
+      "title": "الذنب",
+      "setting": "Nile corniche railing at night turning to dawn, Cairo skyline",
+      "lines": [
+        { "speaker": "youssef", "text": "يا رب أنا وعدتك إني مش هعملها تاني... وعملتها. كل مرة أقول دي آخر مرة وأرجع أقع... أنا مكسوف أكلمك أصلًا." },
+        { "speaker": "jesus", "text": "بصّلي... أنا لسه هنا." },
+        { "speaker": "youssef", "text": "يعني إنت مش زعلان مني؟" },
+        { "speaker": "jesus", "text": "أنا زعلان عليك... مش منك. «إن اعترفنا بخطايانا فهو أمين وعادل... حتى يغفر لنا خطايانا.»" }
+      ],
+      "verse_ref": "1 يوحنا 1: 9"
+    },
+    {
+      "id": "reel5_ashamed_to_return",
+      "order": 5,
+      "title": "مكسوف أرجع",
+      "setting": "small Egyptian bedroom at night, sitting on the edge of a bed, dim lamp, window glowing at dawn",
+      "lines": [
+        { "speaker": "youssef", "text": "يا رب... بقالي كتير مصلّتش. مش عارف أبدأ منين ولا أقول إيه... حاسس إني بعدت أوي." },
+        { "speaker": "jesus", "text": "ما إنت بدأت دلوقتي." },
+        { "speaker": "youssef", "text": "بس هو ينفع أرجع بالسهولة دي؟" },
+        { "speaker": "jesus", "text": "الباب عمره ما اتقفل. «من يُقبل إليّ... لا أخرجه خارجًا.»" }
+      ],
+      "verse_ref": "يوحنا 6: 37"
+    },
+    {
+      "id": "reel6_forget_when_good",
+      "order": 6,
+      "title": "بنساك لما ببقى كويس",
+      "setting": "Qasr El Nil bridge at sunset, Nile and city behind, lion statues blurred",
+      "lines": [
+        { "speaker": "youssef", "text": "يا رب أنا لما ببقى مبسوط بنساك خالص... مبصليش ومبفتكركش. وبعدين أتضايق من نفسي." },
+        { "speaker": "jesus", "text": "بس أنا مبنساكش." },
+        { "speaker": "youssef", "text": "إزاي؟... إزاي لسه بتستحملني؟" },
+        { "speaker": "jesus", "text": "عشان إنت غالي عندي. «هوذا على كفّيّ... نقشتك.»" }
+      ],
+      "verse_ref": "إشعياء 49: 16"
+    }
+  ]
+}
