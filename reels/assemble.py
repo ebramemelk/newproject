@@ -12,7 +12,11 @@ Shot timing follows the dialogue (timeline.json from tts.py):
   shot4  Jesus close-up       end line 3   -> end of line 4 (verse)
   shot5  golden wide + fade   end line 4   -> + TAIL_SEC
 
-Output: reels/out/<reel_id>/<reel_id>.mp4 (1080x1920, 30 fps, H.264/AAC).
+A short gold flash marks each cut, and if reels/music/<reel_id>.mp3 (or
+music/default.mp3) exists it plays quietly under the voice.
+
+Output: reels/out/<reel_id>/<reel_id>.mp4 (1080x1920, 30 fps, H.264/AAC)
+plus <reel_id>_phone.mp4 (720x1280, small enough to send to a phone).
 Exits non-zero if any reel falls outside 20-25 s.
 
 Usage: python3 reels/assemble.py [reel_id ...]
@@ -21,11 +25,13 @@ import json
 import subprocess
 import sys
 
-from common import (CLIPS, FONTS, MAX_SEC, MIN_SEC, TAIL_SEC, load_scripts,
-                    load_timeline, reel_dir)
+from common import (CLIPS, FONTS, MAX_SEC, MIN_SEC, ROOT, TAIL_SEC,
+                    load_scripts, load_timeline, reel_dir)
 
 W, H, FPS = 1080, 1920, 30
 FADE_SEC = 2.5
+FLASH = "0xF5D27A"   # warm gold
+MUSIC_VOL = 0.15
 PLACEHOLDER = ["0x1b2a44", "0x2a3a55", "0x4a4a50", "0x8a6a3a", "0xc8962e"]
 
 
@@ -33,6 +39,23 @@ def shot_bounds(tl):
     ends = [l["end"] for l in tl["lines"]]
     cuts = [0.0] + ends + [tl["speech_end"] + TAIL_SEC]
     return [(cuts[i], cuts[i + 1]) for i in range(5)]
+
+
+def find_music(reel_id):
+    for name in (reel_id, "default"):
+        for ext in ("mp3", "wav", "m4a"):
+            p = ROOT / "music" / f"{name}.{ext}"
+            if p.exists():
+                return p
+
+
+def gold_flashes(cuts):
+    """Two-step flash (bright, then softer) on every cut."""
+    f = []
+    for t in cuts:
+        f.append(f"drawbox=c={FLASH}@0.55:t=fill:enable='between(t,{t:.3f},{t + 0.07:.3f})'")
+        f.append(f"drawbox=c={FLASH}@0.25:t=fill:enable='between(t,{t + 0.07:.3f},{t + 0.18:.3f})'")
+    return ",".join(f)
 
 
 def probe_duration(path):
@@ -61,18 +84,30 @@ def assemble(reel):
 
     ass = str(d / "captions.ass").replace(":", r"\:")
     fonts = str(FONTS).replace(":", r"\:")
+    music = find_music(reel["id"])
+    if music:
+        inputs_audio = ["-i", str(d / "dialogue.wav"), "-stream_loop", "-1", "-i", str(music)]
+        audio = f"[5:a]apad[vo];[6:a]volume={MUSIC_VOL}[m];[vo][m]amix=inputs=2:duration=first:normalize=0,"
+    else:
+        inputs_audio = ["-i", str(d / "dialogue.wav")]
+        audio = "[5:a]apad,"
     graph = ";".join(chains) + ";" + "".join(f"[v{i}]" for i in range(5)) + \
-        f"concat=n=5:v=1:a=0,fade=t=out:st={total - FADE_SEC:.3f}:d={FADE_SEC}," \
-        f"ass='{ass}':fontsdir='{fonts}',format=yuv420p[v];" \
-        f"[5:a]apad,atrim=duration={total:.3f},afade=t=out:st={total - FADE_SEC:.3f}:d={FADE_SEC}[a]"
+        f"concat=n=5:v=1:a=0,{gold_flashes([a for a, _ in bounds[1:]])}," \
+        f"fade=t=out:st={total - FADE_SEC:.3f}:d={FADE_SEC}," \
+        f"ass='{ass}':fontsdir='{fonts}',format=yuv420p[v];" + audio + \
+        f"atrim=duration={total:.3f},afade=t=out:st={total - FADE_SEC:.3f}:d={FADE_SEC}[a]"
 
     out = d / f"{reel['id']}.mp4"
-    cmd = ["ffmpeg", "-y", "-v", "error", *inputs, "-i", str(d / "dialogue.wav"),
+    cmd = ["ffmpeg", "-y", "-v", "error", *inputs, *inputs_audio,
            "-filter_complex", graph, "-map", "[v]", "-map", "[a]",
            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-r", str(FPS),
            "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
            "-t", f"{total:.3f}", "-movflags", "+faststart", str(out)]
     subprocess.run(cmd, check=True)
+
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(out), "-vf", "scale=720:1280:flags=lanczos",
+                    "-c:v", "libx264", "-preset", "slow", "-crf", "23", "-c:a", "aac", "-b:a", "160k",
+                    "-movflags", "+faststart", str(d / f"{reel['id']}_phone.mp4")], check=True)
 
     real = probe_duration(out)
     ok = MIN_SEC <= real <= MAX_SEC

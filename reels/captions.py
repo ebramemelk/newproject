@@ -2,9 +2,10 @@
 """Build burned-in captions (ASS) plus an SRT copy for each reel.
 
 Reads out/<reel_id>/timeline.json (from tts.py), splits each line into chunks
-of 2-4 words and spreads the line's duration over the chunks by character
+of up to 7 words (short full sentences, like the AromaTech reels) and spreads the line's duration over the chunks by character
 count. Pauses ("...") and punctuation end a chunk early. The first chunk
-starts at t=0 so the hook is on screen from the first frame.
+starts at t=0 so the hook is on screen from the first frame. The verse
+(everything inside «») is drawn in gold.
 
 Usage: python3 reels/captions.py [reel_id ...]
 """
@@ -13,7 +14,9 @@ import sys
 
 from common import TAIL_SEC, load_scripts, load_timeline, reel_dir
 
-MAX_WORDS = 4
+MAX_WORDS = 7
+GOLD = r"{\c&H3CC8F0&}"   # #F0C83C in ASS BGR order
+WHITE = r"{\c&HFFFFFF&}"
 BREAK_AFTER = re.compile(r"(\.\.\.|[.،,؟?!:»])$")
 
 ASS_HEADER = """[Script Info]
@@ -25,15 +28,15 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Cap,Cairo,82,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,5,2,5,60,60,0,178
+Style: Cap,Cairo,68,&H00FFFFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,5,2,5,60,60,0,178
 Style: Ref,Cairo,52,&H0080D8FF,&H0080D8FF,&H00000000,&H64000000,-1,0,0,0,100,100,0,0,1,3,1,5,60,60,0,178
 Style: Page,Cairo,64,&H00FFFFFF,&H00FFFFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,0,0,5,60,60,0,178
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
-CAP_POS = r"{\an5\pos(540,1180)}"  # centre, just under the face
-REF_POS = r"{\an5\pos(540,1290)}"
+CAP_POS = r"{\an5\pos(540,1540)}"  # lower third, clear of the faces
+REF_POS = r"{\an5\pos(540,1650)}"
 PAGE_POS = r"{\an5\pos(540,960)\fad(400,0)}"
 
 
@@ -71,6 +74,17 @@ def cues_for(timeline):
     return cues
 
 
+def goldify(cues):
+    """Colour the quoted verse gold, carrying the state across chunks."""
+    inside = False
+    for c in cues:
+        text = (GOLD if inside else "") + c[2]
+        text = text.replace("«", GOLD + "«").replace("»", "»" + WHITE)
+        inside = c[2].rfind("«") > c[2].rfind("»") or (inside and "»" not in c[2])
+        c.append(text)
+    return cues
+
+
 def ts_ass(t):
     cs = int(round(t * 100))
     return f"{cs // 360000}:{cs // 6000 % 60:02d}:{cs // 100 % 60:02d}.{cs % 100:02d}"
@@ -83,18 +97,18 @@ def ts_srt(t):
 
 def build(reel, page_name):
     tl = load_timeline(reel["id"])
-    cues = cues_for(tl)
+    cues = goldify(cues_for(tl))
     total = tl["speech_end"] + TAIL_SEC
     last = tl["lines"][-1]
 
-    ev = [f"Dialogue: 0,{ts_ass(a)},{ts_ass(b)},Cap,,0,0,0,,{CAP_POS}{t}" for a, b, t in cues]
+    ev = [f"Dialogue: 0,{ts_ass(a)},{ts_ass(b)},Cap,,0,0,0,,{CAP_POS}{g}" for a, b, _, g in cues]
     ev.append(f"Dialogue: 0,{ts_ass(last['start'])},{ts_ass(last['end'] + 1.0)},Ref,,0,0,0,,"
               f"{REF_POS}{reel['verse_ref']}")
     ev.append(f"Dialogue: 1,{ts_ass(total - 2.0)},{ts_ass(total)},Page,,0,0,0,,{PAGE_POS}{page_name}")
 
     d = reel_dir(reel["id"])
     (d / "captions.ass").write_text(ASS_HEADER + "\n".join(ev) + "\n", encoding="utf-8")
-    srt = [f"{i}\n{ts_srt(a)} --> {ts_srt(b)}\n{t}\n" for i, (a, b, t) in enumerate(cues, 1)]
+    srt = [f"{i}\n{ts_srt(a)} --> {ts_srt(b)}\n{t}\n" for i, (a, b, t, _) in enumerate(cues, 1)]
     (d / "captions.srt").write_text("\n".join(srt), encoding="utf-8")
     print(f"{reel['id']}: {len(cues)} caption cues")
 

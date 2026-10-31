@@ -1,16 +1,18 @@
 # ريلز «حوار مع يسوع»: خط الإنتاج
 
-```bash
-export GEMINI_API_KEY=...                # من environment، مش في الكود
-# اختياري: export GEMINI_TTS_MODEL=...   # لو جوجل غيّرت اسم موديل الـ TTS
-python3 reels/tts.py                     # صوت لكل سطر + dialogue.wav + نسخة multi-speaker
-python3 reels/captions.py                # captions.ass (محروق) + captions.srt
-python3 reels/assemble.py                # MP4 مقاس 1080×1920 + فحص المدة 20–25 ث
-```
+نفس طريقة ريلز أروماتك (فيديو رقم 3): فويس بتسجّله بنفسك، والمشاهد من Google Flow، والمونتاج بالكود.
 
-- السكريبتات في `scripts.json` (غيّر `page_name`). الريل 4 عليه `order: 1` لأنه أقوى هوك.
-- كليبات Kling/Runway تتحط في `reels/clips/<reel_id>/shot1.mp4 … shot5.mp4`. لو كليب ناقص بيتحط مكانه لون (أزرق ← دهبي) عشان تقدر تراجع التوقيت.
-- اللقطة 2 (zoom out) بتبدأ مع آخر كلمة في صلاة يوسف، فخلّي shot1 وshot2 حركة واحدة متصلة في Kling.
-- توقيت الكابشن والفيديو مبني على ملفات السطور (`dialogue.wav`). نسخة الـ multi-speaker للسمع والمقارنة بس.
-- `python3 reels/tts.py --mock` بيطلع صوت تجريبي من غير API عشان تختبر الخط كله.
-- الخط: Cairo Bold (OFL)، ودمجت فيه الحروف العربي واللاتيني عشان libass يعرضهم صح.
+1. **الفويس:** سجّل من `vo_record.md` (متشكّل وفيه السكتات) بصوت Puck على sawty. احفظ كل ريل في `reels/vo/<reel_id>.wav`، وسيب سكتة واضحة بين السطور.
+2. **المشاهد:** اعملها في Google Flow من `flow_prompts.md` (صور 9:16، وبعدين Frames)، ونزّل الكليبات في `reels/clips/<reel_id>/shot1.mp4 … shot5.mp4`.
+3. **موسيقى (اختياري):** `reels/music/default.mp3` أو `reels/music/<reel_id>.mp3`، وبتشتغل واطية تحت الصوت.
+4. **التجميع:**
+   ```bash
+   python3 reels/split_vo.py     # يقسّم الفويس على السطور من السكتات
+   python3 reels/captions.py     # كابشن جمل قصيرة تحت، والآية بالدهبي
+   python3 reels/assemble.py     # MP4 1080×1920 + نسخة موبايل 720p + فلاش دهبي بين اللقطات + فحص 20–25 ث
+   ```
+
+- لو مش هتسجّل بنفسك: `tts.py` بيعمل الفويس من Gemini TTS (`GEMINI_API_KEY`) بدل خطوة 1 و`split_vo.py`.
+- `python3 reels/tts.py --mock` بيطلع صوت تجريبي عشان تختبر الخط كله من غير أي ملفات.
+- لو كليب ناقص بيتحط مكانه لون (أزرق لحد دهبي) عشان تراجع التوقيت.
+- الخط Cairo Bold (OFL)، ودمجت فيه الحروف العربي واللاتيني.
